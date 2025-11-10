@@ -1,0 +1,87 @@
+// Prisma schema for ms-contracts
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContratoStatus {
+  ATIVO
+  INATIVO
+  VENCIDO
+  SUSPENSO
+}
+
+// Modelos principais (referência ao schema principal)
+model Operadora {
+  id            String   @id @default(uuid())
+  nomeFantasia  String
+  razaoSocial   String
+  codigoANS     String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  contratos     Contrato[]
+
+  @@map("operadoras")
+}
+
+model Contrato {
+  id                  String   @id @default(uuid())
+  operadoraId         String
+  numero              String   @unique
+  dataInicio          DateTime
+  dataFim             DateTime?
+  status              ContratoStatus   @default(ATIVO)
+  prazoMedioPagamento Int      @default(30)
+  observacoes         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  operadora           Operadora        @relation(fields: [operadoraId], references: [id])
+  itens               ContratoItem[]
+
+  @@index([operadoraId])
+  @@index([status])
+  @@index([dataInicio])
+  @@index([dataFim])
+  @@map("contratos")
+}
+
+model ContratoItem {
+  id                  String   @id @default(uuid())
+  contratoId          String
+  codigoTUSS          String
+  descricao           String?
+  valorContratado     Decimal  @db.Decimal(10, 2)
+  estaNoPacote        Boolean  @default(true)
+  requerAutorizacao   Boolean  @default(false)
+  observacoes         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  contrato            Contrato                      @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  materiaisInclusos   ContratoMateriaisInclusos[]
+
+  @@unique([contratoId, codigoTUSS])
+  @@index([contratoId])
+  @@index([codigoTUSS])
+  @@map("contrato_itens")
+}
+
+model ContratoMateriaisInclusos {
+  id                String        @id @default(uuid())
+  contratoItemId    String
+  descricaoMaterial String
+  quantidade        Int           @default(1)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  contratoItem      ContratoItem  @relation(fields: [contratoItemId], references: [id], onDelete: Cascade)
+
+  @@index([contratoItemId])
+  @@map("contrato_materiais_inclusos")
+}
