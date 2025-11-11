@@ -2,11 +2,10 @@
   "name": "ms-contracts",
   "version": "1.0.0",
   "description": "Microsserviço para gerenciamento de contratos e operadoras",
-  "main": "dist/app.js",
+  "main": "src/server.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
     "test": "jest"
   },
   "keywords": [
