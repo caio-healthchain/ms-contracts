@@ -38,6 +38,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
+// PostgreSQL connection test (Prisma)
+async function testPrismaConnection() {
+  try {
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Connected to PostgreSQL (Prisma)');
+  } catch (error) {
+    console.error('❌ PostgreSQL connection error:', error.message);
+  }
+}
+
 // MongoDB connection (for CQRS)
 let mongoClient;
 async function connectMongo() {
@@ -46,7 +57,7 @@ async function connectMongo() {
     await mongoClient.connect();
     console.log('✅ Connected to Cosmos DB (MongoDB)');
   } catch (error) {
-    console.error('❌ Cosmos DB connection error:', error);
+    console.error('❌ Cosmos DB connection error:', error.message);
   }
 }
 
@@ -57,6 +68,7 @@ app.listen(PORT, async () => {
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   
   // Connect to databases
+  await testPrismaConnection();
   await connectMongo();
   
   console.log('✅ ms-contracts ready!');
