@@ -4,6 +4,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { PrismaClient } = require('@prisma/client');
 const { MongoClient } = require('mongodb');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const { swaggerOptions } = require('./config/swagger');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -12,6 +15,10 @@ const prisma = new PrismaClient();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Swagger documentation
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Health check
 app.get('/health', (req, res) => {
@@ -53,6 +60,7 @@ app.listen(PORT, async () => {
   await connectMongo();
   
   console.log('✅ ms-contracts ready!');
+  console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
 });
 
 // Graceful shutdown
