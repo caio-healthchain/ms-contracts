@@ -56,7 +56,10 @@ model ContratoItem {
   contratoId          String
   codigoTUSS          String
   descricao           String?
+  tipoItem            String?  // PROCEDIMENTO, MATERIAL, MEDICAMENTO
   valorContratado     Decimal  @db.Decimal(10, 2)
+  valorMaximo         Decimal? @db.Decimal(10, 2)
+  quantidadeMaxima    Int?
   estaNoPacote        Boolean  @default(true)
   requerAutorizacao   Boolean  @default(false)
   observacoes         String?

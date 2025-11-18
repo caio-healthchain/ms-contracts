@@ -87,8 +87,31 @@ class ContractService {
       prisma.contratoItem.count({ where })
     ]);
 
+    // Buscar descrições da tabela tussProcedimentos
+    const codigosTUSS = items.map(item => item.codigoTUSS);
+    const procedimentos = await prisma.$queryRaw`
+      SELECT "codigoTUSS", termo as descricao
+      FROM "tussProcedimentos"
+      WHERE "codigoTUSS" = ANY(${codigosTUSS}::text[])
+    `;
+
+    // Criar mapa de descrições
+    const descricaoMap = {};
+    procedimentos.forEach(proc => {
+      descricaoMap[proc.codigoTUSS] = proc.descricao;
+    });
+
+    // Adicionar descrição aos itens e valores padrão
+    const itemsWithDescricao = items.map(item => ({
+      ...item,
+      descricao: item.descricao || descricaoMap[item.codigoTUSS] || null,
+      tipoItem: item.tipoItem || 'PROCEDIMENTO',
+      valorMaximo: item.valorMaximo || null,
+      quantidadeMaxima: item.quantidadeMaxima || null
+    }));
+
     return {
-      data: items,
+      data: itemsWithDescricao,
       pagination: {
         page,
         limit,
@@ -102,7 +125,7 @@ class ContractService {
    * Busca item específico do contrato
    */
   async getContractItem(contractId, codigoTUSS) {
-    return await prisma.contratoItem.findFirst({
+    const item = await prisma.contratoItem.findFirst({
       where: {
         contratoId: contractId,
         codigoTUSS
@@ -116,6 +139,30 @@ class ContractService {
         }
       }
     });
+
+    if (!item) return null;
+
+    // Buscar descrição da tabela tussProcedimentos se não existir
+    if (!item.descricao) {
+      const procedimento = await prisma.$queryRaw`
+        SELECT termo as descricao
+        FROM "tussProcedimentos"
+        WHERE "codigoTUSS" = ${codigoTUSS}
+        LIMIT 1
+      `;
+      
+      if (procedimento && procedimento.length > 0) {
+        item.descricao = procedimento[0].descricao;
+      }
+    }
+
+    // Adicionar valores padrão
+    return {
+      ...item,
+      tipoItem: item.tipoItem || 'PROCEDIMENTO',
+      valorMaximo: item.valorMaximo || null,
+      quantidadeMaxima: item.quantidadeMaxima || null
+    };
   }
 
   /**
