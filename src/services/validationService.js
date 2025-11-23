@@ -171,7 +171,7 @@ class ValidationService {
       }
 
       const item = contrato.itens[0];
-      const materiaisInclusos = item.materiaisInclusos;
+      const materiaisInclusos = item.materiaisInclusos || [];
 
       // Verificar se materiais cobrados estão inclusos
       const materiaisIndevidos = [];
