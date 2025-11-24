@@ -63,6 +63,9 @@ model ContratoItem {
   estaNoPacote        Boolean  @default(true)
   requerAutorizacao   Boolean  @default(false)
   observacoes         String?
+  tipoAnestesia       String?  // Tipo de anestesia (ex: Geral, Local + Sedação, Raqui + Sedação, Sedação)
+  tempoSalaCirurgica  String?  // Tempo de utilização da sala cirúrgica (ex: Até 1 hora, Até 2 horas)
+  tempoPermanencia    String?  // Tempo de permanência (ex: Até 1 Day Clinic, Até 1 Diária de Apartamento)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   
