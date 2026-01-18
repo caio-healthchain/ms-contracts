@@ -240,6 +240,89 @@ class ContractService {
       }
     });
   }
+
+  /**
+   * Busca contrato ativo de uma operadora pelo nome
+   */
+  async getContractByOperadora(operadoraNome) {
+    const operadora = await prisma.operadora.findFirst({
+      where: {
+        nomeFantasia: {
+          contains: operadoraNome,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!operadora) {
+      return null;
+    }
+
+    return await this.getActiveContract(operadora.id);
+  }
+
+  /**
+   * Retorna resumo de um contrato
+   */
+  async getContractSummary(contractId) {
+    const contract = await prisma.contrato.findUnique({
+      where: { id: contractId },
+      include: {
+        itens: true,
+        operadora: true
+      }
+    });
+
+    if (!contract) {
+      return null;
+    }
+
+    const totalItens = contract.itens.length;
+    const valorTotal = contract.itens.reduce((sum, item) => sum + (item.valorContratual || 0), 0);
+
+    return {
+      id: contract.id,
+      operadora: contract.operadora.nomeFantasia,
+      contratoNumero: contract.contratoNumero,
+      totalItens,
+      valorTotal,
+      valorMedio: totalItens > 0 ? valorTotal / totalItens : 0,
+      status: contract.status,
+      dataInicio: contract.dataInicio,
+      dataFim: contract.dataFim
+    };
+  }
+
+  /**
+   * Lista todos os contratos de uma operadora
+   */
+  async listContractsByOperadora(operadoraNome) {
+    const operadora = await prisma.operadora.findFirst({
+      where: {
+        nomeFantasia: {
+          contains: operadoraNome,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!operadora) {
+      return [];
+    }
+
+    return await prisma.contrato.findMany({
+      where: {
+        operadoraId: operadora.id
+      },
+      include: {
+        operadora: true,
+        _count: {
+          select: { itens: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
 }
 
 module.exports = new ContractService();

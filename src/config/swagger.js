@@ -182,7 +182,7 @@ const swaggerDefinition = {
 
 const swaggerOptions = {
   swaggerDefinition,
-  apis: ['./src/routes/*.js'] // Caminho para os arquivos de rotas com JSDoc
+  apis: ["./src/routes/*.js", "./src/routes/mcpRoutes.js"] // Caminho para os arquivos de rotas com JSDoc
 };
 
 module.exports = { swaggerDefinition, swaggerOptions };

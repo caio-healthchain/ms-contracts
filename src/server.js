@@ -27,10 +27,12 @@ app.get('/health', (req, res) => {
 
 // Routes
 const contractRoutes = require('./routes/contractRoutes');
-const validationRoutes = require('./routes/validationRoutes');
+const validationRoutes = require("./routes/validationRoutes");
+const mcpRoutes = require("./routes/mcpRoutes");
 
 app.use('/api/contracts', contractRoutes);
-app.use('/api/validations', validationRoutes);
+app.use("/api/validations", validationRoutes);
+app.use("/api/mcp", mcpRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
